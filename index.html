@@ -2,65 +2,108 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Helper - Your Intelligent Assistant</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#101827;color:#fff;font-family:Arial,sans-serif}
-header{text-align:center;padding:28px 15px;background:#17243a}
-header h1{color:#62b5ff;font-size:32px}
-header p{color:#c5d2e3}
-main{max-width:650px;margin:25px auto;padding:18px}
-h2{text-align:center}
-.services{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button,select,textarea{font:inherit}
-.service{padding:16px;border:1px solid #42536b;border-radius:12px;background:#1d2b42;color:white;cursor:pointer}
-.service.active{border:2px solid #55aaff;background:#263f60}
-textarea{width:100%;height:130px;margin-top:18px;padding:14px;border-radius:12px;background:#1d2b42;color:white;border:1px solid #52627a}
-#send{width:100%;padding:15px;margin-top:12px;border:0;border-radius:12px;background:#2585df;color:white;font-weight:bold}
-#result{display:none;margin-top:20px;padding:18px;background:#1d2b42;border-radius:12px;white-space:pre-wrap;line-height:1.8}
-footer{text-align:center;color:#9baac0;padding:25px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Helper - مساعدك الذكي</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+      padding: 25px 15px;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px #0001;
+    }
+    h1 { color: #2563eb; }
+    textarea {
+      width: 100%;
+      height: 110px;
+      padding: 12px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      resize: vertical;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: 0;
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-size: 17px;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; }
+    #answer {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 10px;
+      text-align: right;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      min-height: 40px;
+    }
+  </style>
 </head>
 <body>
-<header>
-<h1>AI Helper 🌍</h1>
-<p>Your world, one intelligent assistant.</p>
-<p>مساعدك الذكي في كل مكان</p>
-</header>
-<main>
-<h2>كيف يمكنني مساعدتك؟</h2>
-<div class="services">
-<button class="service active" data-type="الكتابة">✍️ الكتابة</button>
-<button class="service" data-type="الترجمة">🌐 الترجمة</button>
-<button class="service" data-type="الدراسة">📚 الدراسة</button>
-<button class="service" data-type="العمل">💼 العمل</button>
-<button class="service" data-type="أفكار المشاريع">💡 أفكار المشاريع</button>
-<button class="service" data-type="المساعدة العامة">🤖 مساعدة عامة</button>
-</div>
-<textarea id="prompt" placeholder="اكتب ما تحتاج إليه هنا..."></textarea>
-<button id="send">ابدأ الآن ✨</button>
-<div id="result"></div>
-</main>
-<footer>AI Helper © 2026 — Made for everyone 🌍</footer>
-<script>
-let selected="الكتابة";
-document.querySelectorAll(".service").forEach(btn=>{
-btn.onclick=()=>{
-document.querySelectorAll(".service").forEach(b=>b.classList.remove("active"));
-btn.classList.add("active");
-selected=btn.dataset.type;
-};
-});
-document.getElementById("send").onclick=()=>{
-let prompt=document.getElementById("prompt").value.trim();
-let result=document.getElementById("result");
-result.style.display="block";
-result.textContent=prompt
-? "تم استلام طلبك في خدمة "+selected+"!\n\nهذه نسخة أولية من AI Helper. سيتم ربط محرك الذكاء الاصطناعي الحقيقي في المرحلة القادمة.\n\nطلبك: "+prompt
-: "يرجى كتابة طلبك أولاً.";
-};
-</script>
+  <div class="container">
+    <h1>AI Helper 🤖</h1>
+    <p>مرحبًا! أنا مساعدك الذكي. اكتب سؤالك وسأجيبك.</p>
+
+    <textarea id="message" placeholder="اكتب سؤالك هنا..."></textarea>
+    <br>
+    <button id="send" onclick="askAI()">إرسال السؤال</button>
+
+    <div id="answer">ستظهر الإجابة هنا...</div>
+  </div>
+
+  <script>
+    async function askAI() {
+      const message = document.getElementById("message").value.trim();
+      const answer = document.getElementById("answer");
+      const button = document.getElementById("send");
+
+      if (!message) {
+        answer.textContent = "اكتب سؤالك أولًا.";
+        return;
+      }
+
+      button.disabled = true;
+      answer.textContent = "جاري التفكير...";
+
+      try {
+        const response = await fetch(
+          "https://billowing-bar-9805.atman7529.workers.dev",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: message })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "حدث خطأ في الاتصال.");
+        }
+
+        answer.textContent = data.text || "لم تصل إجابة.";
+      } catch (error) {
+        answer.textContent = "تعذر الاتصال: " + error.message;
+      } finally {
+        button.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html>
